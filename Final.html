@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Air Quality Monitoring Dashboard</title>
     <link rel="stylesheet" href="Final.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
 </head>
 <body>
     <!-- Sidebar -->
@@ -19,50 +20,39 @@
         <!-- Header -->
         <div class="header">
             <h1>Air Quality Monitoring Dashboard</h1>
-            <br>
-            <h5>202027546 HaGayoung</h5>
+            <div class="student-num"><h5>202027546 HaGayoung</h5></div>
+        </div>
+
+        <!-- 정보 -->
+        <div id="weather">
+            <h2 id="city-name"></h2> 
+            <span>Temperature: </span><span id="temp"></span>°C <br>
+            <span>Humidity: </span><span id="humidity"></span>% <br>
+        </div>
+        <!--온도 시각화-->
+        <!--습도 시각화-->
+        <!-- 차트 영역 -->
+        <div id="charts">
+            <!-- 온도 및 습도 라인 차트 -->
+            Real-time Temperature, Humidity Graph
+            <canvas id="tempHumidityChart"></canvas>
+            
+        </div>
+        <div id="pollutant-charts">
+            <!-- 오염물질 막대 차트 -->
             <div>
-                <button>🔔</button>
-                <button>📅</button>
-                <button>⋮</button>
+                Pollutant Bar Chart
+                <canvas id="pollutantBarChart"></canvas>
+            </div>
+            
+            <!-- 오염물질 도넛 차트 -->
+            <div>
+                Distribution of pollutants
+                <canvas id="pollutantDonutChart"></canvas>
             </div>
         </div>
-
-        <!-- Carousel Section -->
-        <div class="carousel">
-            <div class="carousel-item"><span>1st</span></div>
-            <div class="carousel-item"><span>2nd</span></div>
-            <div class="carousel-item"><span>3rd</span></div>
-            <div class="carousel-item"><span>4th</span></div>
-        </div>
-
-        <!-- Featured List -->
-        <div class="featured">
-            <h2>Featured</h2>
-            <div class="list-item">
-                <div>
-                    <strong>List item</strong>
-                    <p>Supporting line text lorem ipsum dolor sit amet, consectetur.</p>
-                </div>
-                <button>⋮</button>
-            </div>
-            <div class="list-item">
-                <div>
-                    <strong>List item</strong>
-                    <p>Supporting line text lorem ipsum dolor sit amet, consectetur.</p>
-                </div>
-                <button>⋮</button>
-            </div>
-            <div class="list-item">
-                <div>
-                    <strong>List item</strong>
-                    <p>Supporting line text lorem ipsum dolor sit amet, consectetur.</p>
-                </div>
-                <button>⋮</button>
-            </div>
-        </div>
+        
     </div>
-
     <script src="Final.js"></script>
 </body>
 </html>
