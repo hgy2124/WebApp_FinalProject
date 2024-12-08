@@ -95,12 +95,12 @@ function calculateDiscomfortIndex(temp, humidity) {
 
 // 초기화 함수
 function initializeApp() {
-    // Final.html에서만 위치 요청 실행
-    if (window.location.pathname.includes("Final.html")) {
+    // index.html에서만 위치 요청 실행
+    if (window.location.pathname.includes("index.html")) {
         requestLocation();
         setInterval(requestLocation, 60000); // 1분마다 업데이트
     } else {
-        console.log("Location request skipped: not on Final.html");
+        console.log("Location request skipped: not on index.html");
     }
 
     // 차트 초기화
