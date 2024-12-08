@@ -32,13 +32,20 @@ function loadAndAnalyzeData(fileUrl) {
 // 데이터를 처리하고 시각화하는 함수
 function processAndVisualizeData() {
     const regions = csvData.map(row => `${row["시도"]} ${row["시군구"]}`);
-    const CO = csvData.map(row => parseFloat(row["CO"]?.toString().replace(/,/g, "")) || 0); 
-    const NOx = csvData.map(row => parseFloat(row["NOx"]?.toString().replace(/,/g, "")) || 0); 
-    const PM25 = csvData.map(row => parseFloat(row["PM-2.5"]?.toString().replace(/,/g, "")) || 0); 
+    
+    // 데이터가 쉼표를 포함할 수 있으므로 이를 제거하고 숫자로 변환
+    const CO = csvData.map(row => parseFloat(row["CO"]?.toString().replace(/,/g, "").trim()) || 0); 
+    const NOx = csvData.map(row => parseFloat(row["NOx"]?.toString().replace(/,/g, "").trim()) || 0); 
+    const PM25 = csvData.map(row => parseFloat(row["PM-2.5"]?.toString().replace(/,/g, "").trim()) || 0); 
 
-    drawBarChart(regions, CO, NOx, PM25);
-    drawScatterChart(CO, PM25);
-    drawPieChart(["CO", "NOx", "PM-2.5"], [sumArray(CO), sumArray(NOx), sumArray(PM25)]);
+    // 값이 NaN이면 0으로 처리되게 되므로 NaN 처리 추가
+    const validCO = CO.filter(value => !isNaN(value));
+    const validNOx = NOx.filter(value => !isNaN(value));
+    const validPM25 = PM25.filter(value => !isNaN(value));
+
+    drawBarChart(regions, validCO, validNOx, validPM25);
+    drawScatterChart(validCO, validPM25);
+    drawPieChart(["CO", "NOx", "PM-2.5"], [sumArray(validCO), sumArray(validNOx), sumArray(validPM25)]);
 }
 
 
