@@ -68,6 +68,37 @@ body {
     padding: 10px;
 }
 
+.value {
+    font-size: 2em; 
+    font-weight: bold;
+    text-align: center;
+  }
+  
+
+.row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    gap: 15px;
+}
+
+.weather-box {
+    flex: 1;
+    background-color: white;
+    border-radius: 15px;
+    padding: 10px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.weather-box img {
+    margin-top: 10px;
+    max-width: 50px;
+}
+
+
+
 #air-quality {
     margin-top: 20px;
 }

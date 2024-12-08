@@ -6,13 +6,15 @@
     <title>Air Quality Monitoring Dashboard</title>
     <link rel="stylesheet" href="Final.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
+
 </head>
 <body>
     <!-- Sidebar -->
     <div class="sidebar">
-        <button>🏠<br>Home</button>
-        <button>🗃️<br>Data</button>
-        <button>⋮<br>about</button>
+        <button onclick="navigateTo('Final.html')">🏠<br>Home</button>
+        <button onclick="navigateTo('global.html')">🌎<br>View Global Data</button>
+        <button onclick="navigateTo('data.html')">🗃️<br>Data</button>
+        <button onclick="navigateTo('about.html')">⋮<br>About</button>
     </div>
 
     <!-- Main Content -->
@@ -20,7 +22,7 @@
         <!-- Header -->
         <div class="header">
             <h1>Air Quality Monitoring Dashboard</h1>
-            <div class="student-num"><h5>202027546 HaGayoung</h5></div>
+            <div class="student-num"><h4>202027546 HaGayoung</h4></div>
         </div>
 
         <!-- 정보 -->
@@ -29,12 +31,28 @@
             <span>Temperature: </span><span id="temp"></span>°C <br>
             <span>Humidity: </span><span id="humidity"></span>% <br>
         </div>
-        <!--온도 시각화-->
-        <!--습도 시각화-->
+
+        <!-- 온도, 습도, 불쾌지수 시각화 -->
+        <div id="weather-row" class="row">
+            <div class="weather-box">
+                <h3>Temperature</h3>
+                <span class="value" id="temp-value"></span>°C
+            </div>
+            <div class="weather-box">
+                <h3>Humidity</h3>
+                <span class="value" id="humidity-value"></span>%
+            </div>
+            <div class="weather-box">
+                <h3>Discomfort Index</h3>
+                <span class="value" id="discomfort-index"></span>
+                <img id="discomfort-img" src="" alt="Discomfort Level" />
+            </div>            
+        </div>
+
         <!-- 차트 영역 -->
         <div id="charts">
             <!-- 온도 및 습도 라인 차트 -->
-            Real-time Temperature, Humidity Graph
+            Real-time Temperature, Humidity Graph (Update every 1 minute)
             <canvas id="tempHumidityChart"></canvas>
             
         </div>

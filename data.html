@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Analysis</title>
+    <link rel="stylesheet" href="Final.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.0.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <button onclick="navigateTo('Final.html')">🏠<br>Home</button>
+        <button onclick="navigateTo('global.html')">🌎<br>View Global Data</button>
+        <button onclick="navigateTo('data.html')">🗃️<br>Data</button>
+        <button onclick="navigateTo('about.html')">⋮<br>About</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <h1>Data Analysis: 2020 Air Pollutant Emissions</h1>
+        </div>
+        
+         <!-- 파일 업로드 input 추가 -->
+         <input type="file" id="csvFileInput" accept=".csv" onchange="loadAndAnalyzeData(event)">
+
+        <h2>Analysis Results</h2>
+        <!-- Chart Containers -->
+        <canvas id="barChart" width="600" height="400"></canvas>
+        <canvas id="scatterChart" width="600" height="400"></canvas>
+        <canvas id="pieChart" width="600" height="400"></canvas>
+        </div>
+
+    <script src="data.js"></script>
+</body>
+</html>

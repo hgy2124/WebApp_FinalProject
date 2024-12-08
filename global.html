@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Air Quality Monitoring Dashboard - Global Data</title>
+    <link rel="stylesheet" href="Final.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="sidebar">
+        <button onclick="navigateTo('Final.html')">🏠<br>Home</button>
+        <button onclick="navigateTo('global.html')">🌎<br>View Global Data</button>
+        <button onclick="navigateTo('data.html')">🗃️<br>Data</button>
+        <button onclick="navigateTo('about.html')">⋮<br>About</button>
+    </div>
+
+    <div class="main-content">
+        <div class="header">
+            <h1>Global Air Quality Data</h1>
+            <div class="student-num"><h4>202027546 HaGayoung</h4></div>
+        </div>
+
+        <div>
+            <label for="country-select">Select a Country: </label>
+            <select id="country-select">
+                <option value="London" data-country="GB">United Kingdom</option>
+                <option value="New York" data-country="US">United States</option>
+                <option value="Tokyo" data-country="JP">Japan</option>
+                <option value="Seoul" data-country="KR">South Korea</option>
+                <option value="Paris" data-country="FR">France</option>
+                <option value="Toronto" data-country="CA">Canada</option>
+                <option value="Berlin" data-country="DE">Germany</option>
+                <option value="Rome" data-country="IT">Italy</option>
+                <option value="Madrid" data-country="ES">Spain</option>
+                <option value="Sydney" data-country="AU">Australia</option>
+            </select>
+            <button onclick="fetchGlobalData()">Show Data</button>
+        </div>
+
+        <div id="weather">
+            <h2 id="city-name"></h2> 
+            <img id="country-flag" src="" alt="국기" style="width: 100px; height: 50px;" />
+        </div>
+
+        <div id="weather-row" class="row">
+            <div class="weather-box">
+                <h3>Temperature</h3>
+                <span class="value" id="temp-value"></span>°C
+            </div>
+            <div class="weather-box">
+                <h3>Humidity</h3>
+                <span class="value" id="humidity-value"></span>%
+            </div>
+            <div class="weather-box">
+                <h3>Discomfort Index</h3>
+                <span class="value" id="discomfort-index"></span>
+                <img id="discomfort-img" src="" alt="Discomfort Level" />
+            </div>            
+        </div>
+
+        <div id="pollutant-charts">
+            <div>Pollutant Bar Chart
+                <canvas id="pollutantBarChart"></canvas>
+            </div>
+            <div>Distribution of pollutants
+                <canvas id="pollutantDonutChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="Final.js"></script>
+</body>
+</html>
