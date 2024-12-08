@@ -32,9 +32,9 @@ function loadAndAnalyzeData(fileUrl) {
 // 데이터를 처리하고 시각화하는 함수
 function processAndVisualizeData() {
     const regions = csvData.map(row => `${row["시도"]} ${row["시군구"]}`);
-    const CO = csvData.map(row => parseFloat(row["CO"].replace(/,/g, "")) || 0); 
-    const NOx = csvData.map(row => parseFloat(row["NOx"].replace(/,/g, "")) || 0); 
-    const PM25 = csvData.map(row => parseFloat(row["PM-2.5"].replace(/,/g, "")) || 0); 
+    const CO = csvData.map(row => parseFloat(row["CO"]?.replace(/,/g, "")) || 0); 
+    const NOx = csvData.map(row => parseFloat(row["NOx"]?.replace(/,/g, "")) || 0); 
+    const PM25 = csvData.map(row => parseFloat(row["PM-2.5"]?.replace(/,/g, "")) || 0); 
 
     drawBarChart(regions, CO, NOx, PM25);
     drawScatterChart(CO, PM25);
