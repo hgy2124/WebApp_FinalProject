@@ -26,11 +26,34 @@
         </div>
         
         <h2>Analysis Results</h2>
+        <!-- Data Description Section -->
+        <section>
+            <h3>Data Description</h3>
+            <p>
+                This dataset contains the <strong>air pollutant emission amounts by administrative district in South Korea for the year 2020</strong>.
+                It includes the emission quantities of various pollutants such as Carbon Monoxide (CO), Nitrogen Oxides (NOx), Sulfur Oxides (SOx),
+                Total Suspended Particulates (TSP), Particulate Matter (PM-10), Fine Particulate Matter (PM-2.5), Volatile Organic Compounds (VOC),
+                Ammonia (NH3), and Black Carbon (BC) for each administrative region (province, city, and district). Additionally, it provides detailed
+                information about the emission sources, including the major, sub-categories, and specific classifications of the sources. This data is
+                useful for understanding the levels of air pollution across South Korea and for analyzing the regional distribution of pollutants.
+            </p>
+        </section>
+        
         <!-- Chart Containers -->
-        <canvas id="barChart" width="600" height="400"></canvas>
-        <canvas id="scatterChart" width="600" height="400"></canvas>
-        <canvas id="pieChart" width="600" height="400"></canvas>
+        <div id="weather">
+            Air Pollution by Region
+            <canvas id="barChart" width="600" height="400"></canvas>
         </div>
+        <div id="weather">
+            CO vs PM2.5 Correlation
+            <canvas id="scatterChart" width="600" height="400"></canvas>
+        </div>
+        <div id="weather">
+            Total Pollutant Distribution
+            <canvas id="pieChart" width="600" height="400"></canvas>
+        </div>
+        
+    </div>
 
     <script src="data.js"></script>
 </body>
