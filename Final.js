@@ -203,6 +203,19 @@ function updateFlag(countryCode) {
     flagImg.src = `https://flagcdn.com/w320/${countryCode.toLowerCase()}.png`;
 }
 
+// 오염 물질 데이터를 차트에 반영하는 함수
+function updateCharts(weatherData, pollutants) {
+    // 막대 차트 데이터 갱신
+    barChartData = pollutants;
+    pollutantBarChart.data.datasets[0].data = barChartData;
+    pollutantBarChart.update();
+
+    // 도넛 차트 데이터 갱신
+    donutChartData = pollutants;
+    pollutantDonutChart.data.datasets[0].data = donutChartData;
+    pollutantDonutChart.update();
+}
+
 // 글로벌 데이터 가져오기
 function fetchGlobalData() {
     const selectElement = document.getElementById("country-select");
@@ -239,28 +252,11 @@ function fetchGlobalData() {
                 })
                 .catch(err => {
                     console.error("Air quality data fetch error:", err);
-                    alert("Failed to fetch air quality data.");
                 });
         })
         .catch(err => {
             console.error("Weather data fetch error:", err);
-            alert("Failed to fetch weather data.");
         });
-}
-
-
-
-
-
-function updateCharts(weatherData, pollutantData) {
-    timeLabels.push(new Date().toLocaleTimeString());
-    tempData.push(weatherData.temp);
-    humidityData.push(weatherData.humidity);
-
-    pollutantBarChart.data.datasets[0].data = pollutantData;
-    pollutantDonutChart.data.datasets[0].data = pollutantData;
-    pollutantBarChart.update();
-    pollutantDonutChart.update();
 }
 
 

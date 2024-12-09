@@ -1,8 +1,9 @@
 // JSON 파일 경로
-const jsonFileUrl = './2020pollutant.json'; // 파일 위치에 맞게 경로 설정
+const jsonFileUrl = '2020pollutant.json'; // 파일 위치에 맞게 경로 설정
 
 // JSON 데이터를 저장할 변수
 let jsonData = [];
+
 // 페이지가 로드될 때 데이터 로드 및 분석 함수 호출
 window.onload = function() {
     loadAndAnalyzeData(jsonFileUrl);
