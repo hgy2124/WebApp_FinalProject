@@ -1,178 +1,109 @@
-// GitHub에서 raw CSV 파일을 불러오는 URL
-const csvFileUrl = 'https://raw.githubusercontent.com/hgy2124/WebApp_FinalProject/main/2020pollutant.csv';
+// JSON 파일 경로
+const jsonFileUrl = './2020pollutant.json'; // 파일 위치에 맞게 경로 설정
 
-// CSV 데이터를 저장할 변수
-let csvData = [];
-
+// JSON 데이터를 저장할 변수
+let jsonData = [];
 // 페이지가 로드될 때 데이터 로드 및 분석 함수 호출
 window.onload = function() {
-    loadAndAnalyzeData(csvFileUrl);
+    loadAndAnalyzeData(jsonFileUrl);
 };
 
-// CSV 데이터를 로드하고 분석하는 함수
-function loadAndAnalyzeData(fileUrl) {
-    fetch(fileUrl)
-        .then(response => response.text()) // 파일을 텍스트 형식으로 읽음
+function loadAndAnalyzeData(jsonFileUrl) {
+    fetch(jsonFileUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        }) 
         .then(data => {
-            Papa.parse(data, {
-                header: true, // 첫 번째 행을 헤더로 설정
-                dynamicTyping: true, // 숫자는 자동으로 숫자로 변환
-                complete: function (results) {
-                    csvData = results.data; // 파싱된 데이터를 csvData에 저장
-                    processAndVisualizeData(); // 데이터를 처리하고 시각화
-                },
-                error: function (error) {
-                    console.error("CSV 파일 읽기 오류:", error);
-                }
-            });
+            jsonData = data;
+            processAndVisualizeData(); 
         })
-        .catch(error => console.error("CSV 파일 가져오기 오류:", error)); // fetch 오류 처리
+        .catch(error => console.error("JSON 파일 가져오기 오류:", error));
 }
 
-// 데이터를 처리하고 시각화하는 함수
-function processAndVisualizeData() {
-    const regions = csvData.map(row => `${row["시도"]} ${row["시군구"]}`);
-    
-    // 데이터가 쉼표를 포함할 수 있으므로 이를 제거하고 숫자로 변환
-    const CO = csvData.map(row => parseFloat(row["CO"]?.toString().replace(/,/g, "").trim()) || 0); 
-    const NOx = csvData.map(row => parseFloat(row["NOx"]?.toString().replace(/,/g, "").trim()) || 0); 
-    const PM25 = csvData.map(row => parseFloat(row["PM-2.5"]?.toString().replace(/,/g, "").trim()) || 0); 
+function cleanData(field) {
+    return jsonData.map(row => parseFloat(row[field]?.toString().replace(/,/g, "").trim()) || 0);
+}
 
-    // 값이 NaN이면 0으로 처리되게 되므로 NaN 처리 추가
-    const validCO = CO.filter(value => !isNaN(value));
-    const validNOx = NOx.filter(value => !isNaN(value));
-    const validPM25 = PM25.filter(value => !isNaN(value));
+function processAndVisualizeData() {
+    if (!jsonData || jsonData.length === 0) {
+        console.error("No data found!");
+        return;
+    }
+
+    const regions = jsonData.map(row => `${row["시도"]} ${row["시군구"]}`);
+    
+    const CO = cleanData("CO");
+    const NOx = cleanData("NOx");
+    const PM25 = cleanData("PM-2.5");
+
+    const validCO = CO.filter(value => !isNaN(value) && value > 0);
+    const validNOx = NOx.filter(value => !isNaN(value) && value > 0);
+    const validPM25 = PM25.filter(value => !isNaN(value) && value > 0);
+
+    if (validCO.length === 0 || validNOx.length === 0 || validPM25.length === 0) {
+        console.error("유효한 데이터가 없습니다.");
+        return;
+    }
 
     drawBarChart(regions, validCO, validNOx, validPM25);
     drawScatterChart(validCO, validPM25);
     drawPieChart(["CO", "NOx", "PM-2.5"], [sumArray(validCO), sumArray(validNOx), sumArray(validPM25)]);
 }
 
+function sumArray(arr) {
+    return arr.reduce((acc, value) => acc + value, 0);
+}
 
-// 바 차트 그리기
 function drawBarChart(regions, CO, NOx, PM25) {
-    const ctx = document.getElementById("barChart").getContext("2d");
-    new Chart(ctx, {
-        type: "bar",
+    new Chart(document.getElementById('barChart'), {
+        type: 'bar',
         data: {
             labels: regions,
-            datasets: [
-                {
-                    label: "CO Emission (kg/yr)",
+            datasets: [{
+                    label: 'CO',
                     data: CO,
-                    backgroundColor: "rgba(255, 99, 132, 0.5)"
+                    backgroundColor: 'rgba(255, 99, 132, 0.6)'
                 },
                 {
-                    label: "NOx Emission (kg/yr)",
+                    label: 'NOx',
                     data: NOx,
-                    backgroundColor: "rgba(54, 162, 235, 0.5)"
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)'
                 },
                 {
-                    label: "PM-2.5 Emission (kg/yr)",
+                    label: 'PM2.5',
                     data: PM25,
-                    backgroundColor: "rgba(75, 192, 192, 0.5)"
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)'
                 }
             ]
-        },
-        options: {
-            plugins: {
-                title: {
-                    display: true,
-                    text: "Emission by Region"
-                }
-            },
-            responsive: true,
-            scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: "Region"
-                    }
-                },
-                y: {
-                    title: {
-                        display: true,
-                        text: "Emission (kg/yr)"
-                    }
-                }
-            }
         }
     });
 }
 
-// 산점도 차트를 그리는 함수
 function drawScatterChart(CO, PM25) {
-    const ctx = document.getElementById("scatterChart").getContext("2d");
-    const scatterData = CO.map((value, index) => ({ x: value, y: PM25[index] }));
-
-    new Chart(ctx, {
-        type: "scatter",
+    new Chart(document.getElementById('scatterChart'), {
+        type: 'scatter',
         data: {
-            datasets: [
-                {
-                    label: "CO vs PM-2.5",
-                    data: scatterData,
-                    backgroundColor: "rgba(255, 159, 64, 0.5)"
-                }
-            ]
-        },
-        options: {
-            plugins: {
-                title: {
-                    display: true,
-                    text: "CO and PM-2.5 Correlation"
-                }
-            },
-            scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: "CO Emission (kg/yr)"
-                    }
-                },
-                y: {
-                    title: {
-                        display: true,
-                        text: "PM-2.5 Emission (kg/yr)"
-                    }
-                }
-            }
+            datasets: [{
+                label: 'CO vs PM2.5',
+                data: CO.map((coValue, index) => ({ x: coValue, y: PM25[index] })),
+                backgroundColor: 'rgba(75, 192, 192, 0.6)'
+            }]
         }
     });
 }
 
-// 파이 차트를 그리는 함수
 function drawPieChart(labels, data) {
-    const ctx = document.getElementById("pieChart").getContext("2d");
-
-    new Chart(ctx, {
-        type: "pie",
+    new Chart(document.getElementById('pieChart'), {
+        type: 'pie',
         data: {
             labels: labels,
-            datasets: [
-                {
-                    label: "Total Emission Distribution",
-                    data: data,
-                    backgroundColor: [
-                        "rgba(255, 99, 132, 0.5)",
-                        "rgba(54, 162, 235, 0.5)",
-                        "rgba(75, 192, 192, 0.5)"
-                    ]
-                }
-            ]
-        },
-        options: {
-            plugins: {
-                title: {
-                    display: true,
-                    text: "Pollutant Emission Distribution"
-                }
-            }
+            datasets: [{
+                data: data,
+                backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(75, 192, 192, 0.6)']
+            }]
         }
     });
-}
-
-// 배열의 값을 모두 더하는 유틸리티 함수
-function sumArray(array) {
-    return array.reduce((a, b) => a + b, 0);
 }

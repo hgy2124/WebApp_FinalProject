@@ -33,8 +33,6 @@ function navigateTo(page) {
 }
 
 
-
-
 // 날씨 디스플레이 업데이트 함수
 function updateWeatherDisplay(weatherData, cityName) {
     const temp = weatherData.temp;
