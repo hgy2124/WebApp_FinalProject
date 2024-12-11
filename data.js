@@ -65,6 +65,9 @@ function processAndVisualizeData() {
     drawScatterChartByRegion();          
     drawPieChartByRegionExpanded();   
     drawCorrelationScatter("서울특별시");
+    console.log('drawPieChartByRegionExpanded data:', pieData);
+console.log('drawCorrelationScatter data:', scatterData);
+
 }
 
 function drawBarChart(regions, CO, NOx, PM25) {
