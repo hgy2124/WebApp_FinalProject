@@ -265,7 +265,7 @@ function fetchGlobalData() {
                     // 차트 갱신
                     updateWeatherDisplay({ temp, humidity }, selectedCity);
                     updateCharts({ temp, humidity }, pollutants);
-                    updateFlag(countryCode);  // 이제 countryCode를 올바르게 전달
+                    updateFlag(countryCode);  
                 })
                 .catch(err => {
                     console.error("Air quality data fetch error:", err);

@@ -253,29 +253,26 @@ function onGeoOk(position) {
     fetch(weatherUrl)
         .then(response => response.json())
         .then(data => {
-            const weatherData = {
-                temp: data.main.temp,
-                humidity: data.main.humidity
-            };
-
-            updateWeatherDisplay(weatherData, data.name);
+            const temp = parseFloat(data.main.temp);
+            const humidity = parseFloat(data.main.humidity);
 
             const airQualityUrl = `https://api.openweathermap.org/data/2.5/air_pollution?lat=${lat}&lon=${lng}&appid=${API_KEY}`;
-            return fetch(airQualityUrl)
+            fetch(airQualityUrl)
                 .then(response => response.json())
                 .then(airData => {
                     const components = airData.list[0].components;
-                    const pollutantData = {
-                        pm25: components.pm2_5,
-                        pm10: components.pm10,
-                        nox: components.no2,
-                        nh3: components.nh3,
-                        co2: components.co,
-                        so2: components.so2,
-                        o3: components.o3
-                    };
+                    const pollutants = [
+                        components.pm2_5 || 0,
+                        components.pm10 || 0,
+                        components.no2 || 0,
+                        components.nh3 || 0,
+                        components.co || 0,
+                        components.so2 || 0,
+                        components.o3 || 0
+                    ];
 
-                    updateCharts(weatherData, pollutantData);
+                    updateWeatherDisplay({ temp, humidity }, data.name);
+                    updateCharts({ temp, humidity }, pollutants);
                 });
         })
         .catch(err => console.error(err));
