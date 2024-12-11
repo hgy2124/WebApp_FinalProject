@@ -28,34 +28,40 @@ function cleanData(field) {
     return jsonData.map(row => parseFloat(row[field]?.toString().replace(/,/g, "").trim()) || 0);
 }
 
+function aggregateByRegion(field) {
+    const regionMap = {};
+
+    jsonData.forEach(row => {
+        const region = row["시도"];
+        const value = parseFloat(row[field]?.toString().replace(/,/g, "").trim()) || 0;
+
+        if (!regionMap[region]) {
+            regionMap[region] = 0;
+        }
+        regionMap[region] += value; // 해당 시도의 값 누적
+    });
+
+    return regionMap;
+}
+
 function processAndVisualizeData() {
     if (!jsonData || jsonData.length === 0) {
         console.error("No data found!");
         return;
     }
 
-    const regions = jsonData.map(row => `${row["시도"]} ${row["시군구"]}`);
-    
-    const CO = cleanData("CO");
-    const NOx = cleanData("NOx");
-    const PM25 = cleanData("PM-2.5");
+    // 시도별 데이터 집계
+    const coByRegion = aggregateByRegion("CO");
+    const noxByRegion = aggregateByRegion("NOx");
+    const pm25ByRegion = aggregateByRegion("PM-2.5");
 
-    const validCO = CO.filter(value => !isNaN(value) && value > 0);
-    const validNOx = NOx.filter(value => !isNaN(value) && value > 0);
-    const validPM25 = PM25.filter(value => !isNaN(value) && value > 0);
+    // 시각화를 위한 데이터 준비
+    const regions = Object.keys(coByRegion);
+    const CO = regions.map(region => coByRegion[region]);
+    const NOx = regions.map(region => noxByRegion[region]);
+    const PM25 = regions.map(region => pm25ByRegion[region]);
 
-    if (validCO.length === 0 || validNOx.length === 0 || validPM25.length === 0) {
-        console.error("유효한 데이터가 없습니다.");
-        return;
-    }
-
-    drawBarChart(regions, validCO, validNOx, validPM25);
-    drawScatterChart(validCO, validPM25);
-    drawPieChart(["CO", "NOx", "PM-2.5"], [sumArray(validCO), sumArray(validNOx), sumArray(validPM25)]);
-}
-
-function sumArray(arr) {
-    return arr.reduce((acc, value) => acc + value, 0);
+    drawBarChart(regions, CO, NOx, PM25);
 }
 
 function drawBarChart(regions, CO, NOx, PM25) {
@@ -63,7 +69,8 @@ function drawBarChart(regions, CO, NOx, PM25) {
         type: 'bar',
         data: {
             labels: regions,
-            datasets: [{
+            datasets: [
+                {
                     label: 'CO',
                     data: CO,
                     backgroundColor: 'rgba(255, 99, 132, 0.6)'
@@ -79,9 +86,26 @@ function drawBarChart(regions, CO, NOx, PM25) {
                     backgroundColor: 'rgba(75, 192, 192, 0.6)'
                 }
             ]
+        },
+        options: {
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Region (시도)'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Pollutant Levels'
+                    }
+                }
+            }
         }
     });
 }
+
 
 function drawScatterChart(CO, PM25) {
     new Chart(document.getElementById('scatterChart'), {
