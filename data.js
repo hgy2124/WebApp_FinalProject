@@ -107,28 +107,87 @@ function drawBarChart(regions, CO, NOx, PM25) {
 }
 
 
-function drawScatterChart(CO, PM25) {
+// Scatter Chart: CO vs PM2.5 - 시도별 평균 사용
+function drawScatterChartByRegion() {
+    const regionMapCO = aggregateByRegion("CO");
+    const regionMapPM25 = aggregateByRegion("PM-2.5");
+
+    const regions = Object.keys(regionMapCO);
+    const scatterData = regions.map(region => ({
+        x: regionMapCO[region],
+        y: regionMapPM25[region],
+        label: region
+    }));
+
     new Chart(document.getElementById('scatterChart'), {
         type: 'scatter',
         data: {
             datasets: [{
-                label: 'CO vs PM2.5',
-                data: CO.map((coValue, index) => ({ x: coValue, y: PM25[index] })),
-                backgroundColor: 'rgba(75, 192, 192, 0.6)'
+                label: 'CO vs PM2.5 (시도별)',
+                data: scatterData.map(d => ({ x: d.x, y: d.y })),
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                pointLabels: scatterData.map(d => d.label)
             }]
+        },
+        options: {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) {
+                            const region = scatterData[tooltipItem.dataIndex].label;
+                            return `Region: ${region}, CO: ${tooltipItem.raw.x}, PM2.5: ${tooltipItem.raw.y}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'CO Levels'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'PM2.5 Levels'
+                    }
+                }
+            }
         }
     });
 }
 
-function drawPieChart(labels, data) {
+// Pie Chart: 오염 물질 비율 비교
+function drawPieChartByRegion() {
+    const regions = Object.keys(aggregateByRegion("CO"));
+    const pollutants = ["CO", "NOx", "PM-2.5"];
+    const regionSums = pollutants.map(pollutant => {
+        const dataByRegion = aggregateByRegion(pollutant);
+        return Object.values(dataByRegion).reduce((acc, value) => acc + value, 0);
+    });
+
     new Chart(document.getElementById('pieChart'), {
         type: 'pie',
         data: {
-            labels: labels,
+            labels: pollutants,
             datasets: [{
-                data: data,
+                data: regionSums,
                 backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(75, 192, 192, 0.6)']
             }]
+        },
+        options: {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) {
+                            const pollutant = pollutants[tooltipItem.dataIndex];
+                            const total = regionSums[tooltipItem.dataIndex];
+                            return `${pollutant}: ${total.toFixed(2)}`;
+                        }
+                    }
+                }
+            }
         }
     });
 }
