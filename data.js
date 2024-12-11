@@ -62,43 +62,42 @@ function processAndVisualizeData() {
     const PM25 = regions.map(region => pm25ByRegion[region]);
 
     drawBarChart(regions, CO, NOx, PM25);
+    drawBarTChart(["CO", "NOx", "SOx", "TSP", "PM-10", "PM-2.5", "VOC", "NH3", "BC"], jsonData);
     drawScatterChartByRegion();          
     drawPieChartByRegionExpanded();   
-    drawCorrelationScatter("서울특별시");
-
+    drawPieChart(jsonData);
 }
-
 //Total_barchart 
 
-const emissions = ["CO", "NOx", "SOx", "TSP", "PM-10", "PM-2.5", "VOC", "NH3", "BC"];
-const totals = emissions.map(emission => 
-  jsonData.reduce((sum, record) => sum + record[emission], 0)
-);
-
-const ctx = document.getElementById('Total_barChart').getContext('2d');
-new Chart(ctx, {
-  type: 'bar',
-  data: {
-    labels: emissions,
-    datasets: [{
-      label: 'Total Emissions',
-      data: totals,
-      backgroundColor: 'rgba(75, 192, 192, 0.2)',
-      borderColor: 'rgba(75, 192, 192, 1)',
-      borderWidth: 1
-    }]
-  },
-  options: {
-    scales: {
-      y: {
-        beginAtZero: true
+function drawTBarChart(emissions, jsonData) {
+    const totals = emissions.map(emission => 
+      jsonData.reduce((sum, record) => sum + record[emission], 0)
+    );
+  
+    const ctx = document.getElementById('Total_barChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: emissions,
+        datasets: [{
+          label: 'Total Emissions',
+          data: totals,
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          borderColor: 'rgba(75, 192, 192, 1)',
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
       }
-    }
+    });
   }
-});
-
-
-function drawBarChart(regions, CO, NOx, PM25) {
+  
+  function drawBarChart(regions, CO, NOx, PM25) {
     new Chart(document.getElementById('barChart'), {
         type: 'bar',
         data: {
@@ -140,34 +139,80 @@ function drawBarChart(regions, CO, NOx, PM25) {
     });
 }
 
-//piechart - Fuel Type Emissions Distribution
-const fuelTypes = Array.from(new Set(jsonData.map(record => record.연료대분류)));
-const fuelEmissions = fuelTypes.map(fuel => {
-  return emissions.reduce((total, emission) => {
-    return total + jsonData.filter(record => record.연료대분류 === fuel)
-                            .reduce((sum, record) => sum + record[emission], 0);
-  }, 0);
-});
+// Total Pie Chart: 오염 물질 비율 비교
+function drawPieChartByRegionExpanded() {
+    // JSON 데이터의 모든 필드 가져오기
+    const excludeFields = ["시도", "시군구", "배출원대분류", "배출원중분류", "배출원소분류", "연료대분류", "연료소분류"];
+    const allFields = Object.keys(jsonData[0]).filter(field => !excludeFields.includes(field));
 
-const ctx2 = document.getElementById('pieChart').getContext('2d');
-new Chart(ctx2, {
-  type: 'pie',
-  data: {
-    labels: fuelTypes,
-    datasets: [{
-      label: 'Fuel Emissions',
-      data: fuelEmissions,
-      backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#8D49A4', '#FF7A5A'],
-      borderColor: ['#FF6384', '#36A2EB', '#FFCE56', '#8D49A4', '#FF7A5A'],
-      borderWidth: 1
-    }]
-  },
-  options: {
-    responsive: true
-  }
-});
+    // 각 필드에 대해 시도별 합산
+    const fieldSums = allFields.map(field => {
+        const dataByRegion = aggregateByRegion(field);
+        return Object.values(dataByRegion).reduce((acc, value) => acc + value, 0);
+    });
 
+    new Chart(document.getElementById('Total_pieChart'), {
+        type: 'pie',
+        data: {
+            labels: allFields,
+            datasets: [{
+                data: fieldSums,
+                backgroundColor: allFields.map(() => 
+                    `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.6)`
+                )
+            }]
+        },
+        options: {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) {
+                            const field = allFields[tooltipItem.dataIndex];
+                            const total = fieldSums[tooltipItem.dataIndex];
+                            return `${field}: ${total.toFixed(2)}`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
 
+// piechart - Fuel Type Emissions Distribution
+function drawPieChart(jsonData) {
+    const emissions = ["CO", "NOx", "PM-2.5"]; // 예시: 배출량에 사용되는 필드명
+
+    // Fuel Types 추출
+    const fuelTypes = Array.from(new Set(jsonData.map(record => record.연료대분류)));
+
+    // Fuel별 배출량 계산
+    const fuelEmissions = fuelTypes.map(fuel => {
+        return emissions.reduce((total, emission) => {
+            return total + jsonData.filter(record => record.연료대분류 === fuel)
+                                    .reduce((sum, record) => sum + record[emission], 0);
+        }, 0);
+    });
+
+    const ctx2 = document.getElementById('pieChart').getContext('2d');
+    new Chart(ctx2, {
+        type: 'pie',
+        data: {
+            labels: fuelTypes,
+            datasets: [{
+                label: 'Fuel Emissions',
+                data: fuelEmissions,
+                backgroundColor: fuelTypes.map(() => 
+                    `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.6)`
+                ),
+                borderColor: fuelTypes.map(() => '#fff'),
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true
+        }
+    });
+}
 
 // Scatter Chart: CO vs PM2.5 - 시도별 평균 사용
 function drawScatterChartByRegion() {
@@ -219,43 +264,3 @@ function drawScatterChartByRegion() {
         }
     });
 }
-
-// Pie Chart: 오염 물질 비율 비교
-function drawPieChartByRegionExpanded() {
-    // JSON 데이터의 모든 필드 가져오기
-    const excludeFields = ["시도", "시군구", "배출원대분류", "배출원중분류", "배출원소분류", "연료대분류", "연료소분류"];
-    const allFields = Object.keys(jsonData[0]).filter(field => !excludeFields.includes(field));
-
-    // 각 필드에 대해 시도별 합산
-    const fieldSums = allFields.map(field => {
-        const dataByRegion = aggregateByRegion(field);
-        return Object.values(dataByRegion).reduce((acc, value) => acc + value, 0);
-    });
-
-    new Chart(document.getElementById('Total_pieChart'), {
-        type: 'pie',
-        data: {
-            labels: allFields,
-            datasets: [{
-                data: fieldSums,
-                backgroundColor: allFields.map(() => 
-                    `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.6)`
-                )
-            }]
-        },
-        options: {
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(tooltipItem) {
-                            const field = allFields[tooltipItem.dataIndex];
-                            const total = fieldSums[tooltipItem.dataIndex];
-                            return `${field}: ${total.toFixed(2)}`;
-                        }
-                    }
-                }
-            }
-        }
-    });
-}
-
