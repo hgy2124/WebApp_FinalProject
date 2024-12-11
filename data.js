@@ -63,7 +63,8 @@ function processAndVisualizeData() {
 
     drawBarChart(regions, CO, NOx, PM25);
     drawScatterChartByRegion();          
-    drawPieChartByRegion();             
+    drawPieChartByRegion();   
+    drawCorrelationScatter("서울특별시");
 }
 
 function drawBarChart(regions, CO, NOx, PM25) {
@@ -161,21 +162,25 @@ function drawScatterChartByRegion() {
 }
 
 // Pie Chart: 오염 물질 비율 비교
-function drawPieChartByRegion() {
-    const regions = Object.keys(aggregateByRegion("CO"));
-    const pollutants = ["CO", "NOx", "PM-2.5"];
-    const regionSums = pollutants.map(pollutant => {
-        const dataByRegion = aggregateByRegion(pollutant);
+function drawPieChartByRegionExpanded() {
+    // JSON 데이터의 모든 필드 가져오기
+    const allFields = Object.keys(jsonData[0]).filter(field => field !== "시도");
+
+    // 각 필드에 대해 시도별 합산
+    const fieldSums = allFields.map(field => {
+        const dataByRegion = aggregateByRegion(field);
         return Object.values(dataByRegion).reduce((acc, value) => acc + value, 0);
     });
 
     new Chart(document.getElementById('pieChart'), {
         type: 'pie',
         data: {
-            labels: pollutants,
+            labels: allFields,
             datasets: [{
-                data: regionSums,
-                backgroundColor: ['rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(75, 192, 192, 0.6)']
+                data: fieldSums,
+                backgroundColor: allFields.map(() => 
+                    `rgba(${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, ${Math.floor(Math.random() * 255)}, 0.6)`
+                )
             }]
         },
         options: {
@@ -183,10 +188,52 @@ function drawPieChartByRegion() {
                 tooltip: {
                     callbacks: {
                         label: function(tooltipItem) {
-                            const pollutant = pollutants[tooltipItem.dataIndex];
-                            const total = regionSums[tooltipItem.dataIndex];
-                            return `${pollutant}: ${total.toFixed(2)}`;
+                            const field = allFields[tooltipItem.dataIndex];
+                            const total = fieldSums[tooltipItem.dataIndex];
+                            return `${field}: ${total.toFixed(2)}`;
                         }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function drawCorrelationScatter(region) {
+    const regionData = jsonData.filter(row => row["시도"] === region);
+    const coValues = regionData.map(row => parseFloat(row["CO"]?.toString().replace(/,/g, "").trim()) || 0);
+    const pm25Values = regionData.map(row => parseFloat(row["PM-2.5"]?.toString().replace(/,/g, "").trim()) || 0);
+
+    new Chart(document.getElementById('correlationChart'), {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: `CO vs PM2.5 (${region})`,
+                data: coValues.map((co, index) => ({ x: co, y: pm25Values[index] })),
+                backgroundColor: 'rgba(153, 102, 255, 0.6)'
+            }]
+        },
+        options: {
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        label: function(tooltipItem) {
+                            return `CO: ${tooltipItem.raw.x}, PM2.5: ${tooltipItem.raw.y}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'CO Levels'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'PM2.5 Levels'
                     }
                 }
             }
