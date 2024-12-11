@@ -62,6 +62,8 @@ function processAndVisualizeData() {
     const PM25 = regions.map(region => pm25ByRegion[region]);
 
     drawBarChart(regions, CO, NOx, PM25);
+    drawScatterChartByRegion();          
+    drawPieChartByRegion();             
 }
 
 function drawBarChart(regions, CO, NOx, PM25) {
