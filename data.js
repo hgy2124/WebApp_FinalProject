@@ -65,10 +65,38 @@ function processAndVisualizeData() {
     drawScatterChartByRegion();          
     drawPieChartByRegionExpanded();   
     drawCorrelationScatter("서울특별시");
-    console.log('drawPieChartByRegionExpanded data:', pieData);
-console.log('drawCorrelationScatter data:', scatterData);
 
 }
+
+//Total_barchart 
+
+const emissions = ["CO", "NOx", "SOx", "TSP", "PM-10", "PM-2.5", "VOC", "NH3", "BC"];
+const totals = emissions.map(emission => 
+  jsonData.reduce((sum, record) => sum + record[emission], 0)
+);
+
+const ctx = document.getElementById('Total_barChart').getContext('2d');
+new Chart(ctx, {
+  type: 'bar',
+  data: {
+    labels: emissions,
+    datasets: [{
+      label: 'Total Emissions',
+      data: totals,
+      backgroundColor: 'rgba(75, 192, 192, 0.2)',
+      borderColor: 'rgba(75, 192, 192, 1)',
+      borderWidth: 1
+    }]
+  },
+  options: {
+    scales: {
+      y: {
+        beginAtZero: true
+      }
+    }
+  }
+});
+
 
 function drawBarChart(regions, CO, NOx, PM25) {
     new Chart(document.getElementById('barChart'), {
@@ -111,6 +139,34 @@ function drawBarChart(regions, CO, NOx, PM25) {
         }
     });
 }
+
+//piechart - Fuel Type Emissions Distribution
+const fuelTypes = Array.from(new Set(jsonData.map(record => record.연료대분류)));
+const fuelEmissions = fuelTypes.map(fuel => {
+  return emissions.reduce((total, emission) => {
+    return total + jsonData.filter(record => record.연료대분류 === fuel)
+                            .reduce((sum, record) => sum + record[emission], 0);
+  }, 0);
+});
+
+const ctx2 = document.getElementById('pieChart').getContext('2d');
+new Chart(ctx2, {
+  type: 'pie',
+  data: {
+    labels: fuelTypes,
+    datasets: [{
+      label: 'Fuel Emissions',
+      data: fuelEmissions,
+      backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#8D49A4', '#FF7A5A'],
+      borderColor: ['#FF6384', '#36A2EB', '#FFCE56', '#8D49A4', '#FF7A5A'],
+      borderWidth: 1
+    }]
+  },
+  options: {
+    responsive: true
+  }
+});
+
 
 
 // Scatter Chart: CO vs PM2.5 - 시도별 평균 사용
@@ -167,7 +223,8 @@ function drawScatterChartByRegion() {
 // Pie Chart: 오염 물질 비율 비교
 function drawPieChartByRegionExpanded() {
     // JSON 데이터의 모든 필드 가져오기
-    const allFields = Object.keys(jsonData[0]).filter(field => field !== "시도");
+    const excludeFields = ["시도", "시군구", "배출원대분류", "배출원중분류", "배출원소분류", "연료대분류", "연료소분류"];
+    const allFields = Object.keys(jsonData[0]).filter(field => !excludeFields.includes(field));
 
     // 각 필드에 대해 시도별 합산
     const fieldSums = allFields.map(field => {
@@ -175,7 +232,7 @@ function drawPieChartByRegionExpanded() {
         return Object.values(dataByRegion).reduce((acc, value) => acc + value, 0);
     });
 
-    new Chart(document.getElementById('pieChart'), {
+    new Chart(document.getElementById('Total_pieChart'), {
         type: 'pie',
         data: {
             labels: allFields,
@@ -202,44 +259,3 @@ function drawPieChartByRegionExpanded() {
     });
 }
 
-function drawCorrelationScatter(region) {
-    const regionData = jsonData.filter(row => row["시도"] === region);
-    const coValues = regionData.map(row => parseFloat(row["CO"]?.toString().replace(/,/g, "").trim()) || 0);
-    const pm25Values = regionData.map(row => parseFloat(row["PM-2.5"]?.toString().replace(/,/g, "").trim()) || 0);
-
-    new Chart(document.getElementById('correlationChart'), {
-        type: 'scatter',
-        data: {
-            datasets: [{
-                label: `CO vs PM2.5 (${region})`,
-                data: coValues.map((co, index) => ({ x: co, y: pm25Values[index] })),
-                backgroundColor: 'rgba(153, 102, 255, 0.6)'
-            }]
-        },
-        options: {
-            plugins: {
-                tooltip: {
-                    callbacks: {
-                        label: function(tooltipItem) {
-                            return `CO: ${tooltipItem.raw.x}, PM2.5: ${tooltipItem.raw.y}`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    title: {
-                        display: true,
-                        text: 'CO Levels'
-                    }
-                },
-                y: {
-                    title: {
-                        display: true,
-                        text: 'PM2.5 Levels'
-                    }
-                }
-            }
-        }
-    });
-}
