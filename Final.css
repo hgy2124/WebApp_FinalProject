@@ -8,10 +8,19 @@
 
 body {
     display: flex;
+    flex-direction: column;  /* 부모 요소를 세로 방향으로 배치 */
     height: 100vh;
     background-color: #CCDEE0;
 }
 
+footer {
+    background-color: #D9D9D9;
+    color: black;
+    text-align: center;
+    padding: 20px;
+    position: relative;
+    width: 100%;
+}
 /* Sidebar */
 .sidebar {
     width: 60px;
